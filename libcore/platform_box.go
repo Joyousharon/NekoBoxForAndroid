@@ -8,6 +8,7 @@ import (
 	"libcore/procfs"
 	"log"
 	"net/netip"
+	"strings"
 	"syscall"
 
 	"github.com/sagernet/sing-box/adapter"
@@ -24,6 +25,14 @@ import (
 var boxPlatformInterfaceInstance platform.Interface = &boxPlatformInterfaceWrapper{}
 
 type boxPlatformInterfaceWrapper struct{}
+
+func (w *boxPlatformInterfaceWrapper) ReadWIFIState() adapter.WIFIState {
+	state := strings.Split(intfBox.WIFIState(), ",")
+	return adapter.WIFIState{
+		SSID:  state[0],
+		BSSID: state[1],
+	}
+}
 
 func (w *boxPlatformInterfaceWrapper) Initialize(ctx context.Context, router adapter.Router) error {
 	return nil
@@ -81,8 +90,12 @@ func (w *boxPlatformInterfaceWrapper) UsePlatformInterfaceGetter() bool {
 	return false
 }
 
-func (w *boxPlatformInterfaceWrapper) Interfaces() ([]platform.NetworkInterface, error) {
+func (w *boxPlatformInterfaceWrapper) Interfaces() ([]control.Interface, error) {
 	return nil, errors.New("wtf")
+}
+
+func (w *boxPlatformInterfaceWrapper) IncludeAllNetworks() bool {
+	return false
 }
 
 // Android not using
